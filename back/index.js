@@ -3,6 +3,8 @@ import mysql from "mysql";
 import cors from "cors";
 import multer from "multer";
 import path from 'path';
+import PDFDocument from 'pdfkit'
+import fs from 'fs'
 
 const app = express();
 app.use(cors());
@@ -213,6 +215,178 @@ app.post("/inscription/create", (req, res) => {
     return res.json(data);
   });
 });
+
+// ------------------------------------PDF-----------------
+app.get("/generate-pdf", (req, res) => {
+
+
+  const doc = new PDFDocument({
+    size: "A6",
+    layout: "landscape",
+  });
+  doc.pipe(fs.createWriteStream("pdf.pdf"));
+  doc.pipe(res);
+
+  const personne = {
+    MATRICULE: "2450",
+    ID_PARCOURS: "GB",
+    ID_NIVEAU: "L3",
+    NOM_ETUDIANT: "RASOLONIRINA",
+    PRENOM_ETUDIANT: "Fitahiana Martial",
+    DATENAISSANCE: "2002-03-29",
+    LIEUNAISSANCE: "Isada Fianarantsoa",
+    SITUATION_MATRI: "Célibataire",
+    CIN: 201012031144,
+    ADRESSE: "IR 323 Ambanilalana Fianarantsoa",
+    CONTACT: 346331923,
+    EMAIL: "ttnmiora@gmail.com",
+    STATUS: "Admis",
+    CONTACT: "0346331923",
+  };
+  
+
+  doc.image("./image/MIORA.png", 30, 110, {
+    fit: [80, 200],
+  });
+
+  doc.image("./image/fianarantsoa.jpg", 50, 7, {
+    fit: [40, 60],
+    align: "right",
+    valign: "bottom",
+  });
+
+  doc.fontSize(8);
+  doc.font("Times-Roman");
+  doc.text(
+    "MINISTERE DE L ENSEIGNEMENT SUPERIEUR \n ET DE LA RECHERCHE SCIENTIFIQUE",
+    70,
+    20,
+    {
+      align: "center",
+    }
+  );
+
+  doc.fontSize(9);
+  doc.font("Courier-Bold");
+  doc.text("UNIVERSITE DE FIANARANTSOA", 70, 40, {
+    align: "center",
+  });
+
+  doc.fontSize(10);
+  doc.text("ECOLE NATIONALE D'INFORMATIQUE", 70, 50, {
+    align: "center",
+  });
+
+  doc.font("Courier-BoldOblique", 5);
+  doc.text(
+    '"Ecole ingénieuse, pépinière des élites informaticiennes"',
+    70,
+    60,
+    {
+      align: "center",
+    }
+  );
+
+  doc.image("./image/eni.png", 330, 7, {
+    fit: [40, 60],
+    align: "right",
+    valign: "bottom",
+  });
+
+  doc.fontSize(9);
+  doc.font("Courier-Bold");
+  doc.text(
+    `Matricule: ${personne.MATRICULE}\n Niveau: ${personne.ID_NIVEAU} \n `,
+    50,
+    80
+  );
+  doc.fontSize(9);
+  doc.font("Courier-Bold");
+  doc.text(
+    ` Parcours: ${personne.ID_PARCOURS} \n Mention: Informatique`,
+    220,
+    80
+  );
+
+  doc.fontSize(8);
+  doc.font("Times-Italic");
+  doc.text("Nom:", 120, 110);
+
+  doc.fontSize(10);
+  doc.font("Times-Bold");
+  doc.text(personne.NOM_ETUDIANT, 130);
+
+  doc.fontSize(8);
+  doc.font("Times-Italic");
+  doc.text("Prénoms:", 120);
+
+  doc.font("Times-Roman", 10);
+  doc.text(personne.PRENOM_ETUDIANT, 130);
+
+  doc.image("./image/calendrier.png", 120, 150, {
+    fit: [16, 16],
+  });
+
+  doc.font("Times-Italic", 8);
+  doc.text(`Né le: `, 140, 155);
+
+  doc.font("Times-Roman", 10);
+  doc.text(` ${personne.DATENAISSANCE}`, 160, 155);
+
+  doc.font("Times-Italic", 8);
+  doc.text(` à : `, 215, 155);
+
+  doc.font("Times-Roman", 10);
+  doc.text(` ${personne.LIEUNAISSANCE}`, 225, 155);
+
+  doc.image("./image/cin.png", 120, 170, {
+    fit: [16, 16],
+  });
+
+  doc.font("Times-Italic", 8);
+  doc.text(`CIN:`, 140, 175);
+
+  doc.font("Times-Roman", 10);
+  doc.text(`${personne.CIN}`, 160, 173);
+
+  doc.image("./image/phone.png", 120, 190, {
+    fit: [16, 16],
+  });
+
+  doc.font("Times-Italic", 8);
+  doc.text(`Téléphone:`, 140, 195);
+
+  doc.font("Times-Roman", 10);
+  doc.text(`${personne.CONTACT}`, 177, 195);
+
+  doc.font("Times-Italic", 8);
+  doc.text(`Email:`, 230, 195);
+
+  doc.font("Times-Roman", 10);
+  doc.text(` ${personne.EMAIL}`, 253, 194);
+
+  doc.image("./image/localisation.png", 120, 210, {
+    fit: [16, 16],
+  });
+
+  doc.font("Times-Italic", 8);
+  doc.text(`Adresse:`, 140, 215);
+
+  doc.font("Times-Roman", 10);
+  doc.text(` ${personne.ADRESSE}`, 170, 213);
+
+  doc.image("./image/signature.PNG", 50, 240, {
+    fit: [30, 50],
+  });
+
+  doc.image("./image/annee.PNG", 300, 270, {
+    fit: [100, 150],
+  });
+
+  doc.end();
+});
+
+// --------------------------------PDF----------------------
 
 app.listen(8080, () => {
   console.log("Your server is ready");
