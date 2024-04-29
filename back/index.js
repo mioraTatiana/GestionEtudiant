@@ -105,37 +105,44 @@ app.get("/etudiant", (req, res) => {
 
 app.post("/etudiant/create", (req, res) => {
   const etudiant = {
-    matricule: req.body.MATRICULE,
-    parcours: req.body.ID_PARCOURS,
-    niveau: req.body.ID_NIVEAU,
-    nomEtudiant: req.body.NOM_ETUDIANT,
-    prenomEtudiant: req.body.PRENOM_ETUDIANT,
-    dateNaissance: req.body.DATENAISSANCE,
-    lieuNaissance: req.body.LIEUNAISSANCE,
-    situationMatri: req.body.SITUATION_MATRI,
-    cin: req.body.CIN,
-    adresse: req.body.ADRESSE,
-    contact: req.body.CONTACT,
-    email: req.body.EMAIL,
-    status: req.body.STATUS,
-    nomPere: req.body.NOMETPRENOM_PERE,
-    nomMere: req.body.NOMETPRENOM_MERE,
-    nomTuteur: req.body.NOMETPRENOM_TUTEUR,
-    adressePere: req.body.ADRESSE_PERE,
-    adresseMere: req.body.ADRESSE_MERE,
-    adresseTuteur: req.body.ADRESSE_TUTEUR,
-    professionPere: req.body.PROFESSION_PERE,
-    professionMere: req.body.PROFESSION_MERE,
-    professionTuteur: req.body.PROFESSION_TUTEUR,
-    contactPere: req.body.CONTACT_PERE,
-    contactMere: req.body.CONTACT_MERE,
-    contactTuteur: req.body.CONTACT_TUTEUR,
+    matricule: req.body.matricule,
+    parcours: req.body.parcours,
+    niveau: req.body.niveau,
+    nomEtudiant: req.body.nom,
+    prenomEtudiant: req.body.prenom,
+    dateNaissance: req.body.dateNaissance,
+    lieuNaissance: req.body.lieuNaissance,
+    situationMatri: req.body.situation,
+    cin: req.body.cin,
+    adresse: req.body.adresse,
+    contact: req.body.telephone,
+    email: req.body.email,
+    status: req.body.status,
+    serieBac:req.body.serie,
+    anneeScolaire:req.body.anneeScolaire,
+    resultat:req.body.resultat,
+    anneeUnivCursus:req.body.anneeUnivCursus,
+    univ: req.body.univ,
+    niveauCursus: req.body.niveauCursus,
+    parcoursCursus:req.body.parcoursCursus,
+    mentionCursus:req.body.mentionCursus,
+    nomPere: req.body.nomPere,
+    nomMere: req.body.nomMere,
+    nomTuteur: req.body.nomTuteur,
+    adressePere: req.body.adressePere,
+    adresseMere: req.body.adresseMere,
+    adresseTuteur: req.body.adresseTuteur,
+    professionPere: req.body.professionPere,
+    professionMere: req.body.professionMere,
+    professionTuteur: req.body.professionTuteur,
+    contactPere: req.body.contactPere,
+    contactMere: req.body.contactMere,
+    contactTuteur: req.body.contactTuteur,
   };
 
   const valeur = Object.values(etudiant);
 
-  const sql =
-    "INSERT INTO `etudiant`(`MATRICULE`, `ID_PARCOURS`, `ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `STATUS`, `NOMETPRENOM_PERE`, `NOMETPRENOM_MERE`, `NOMETPRENOM_TUTEUR`, `ADRESSE_PERE`, `ADRESSE_MERE`, `ADRESSE_TUTEUR`, `PROFESSION_PERE`, `PROFESSION_MERE`, `PROFESSION_TUTEUR`, `CONTACT_PERE`, `CONTACT_MERE`, `CONTACT_TUTEUR`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  const sql = "INSERT INTO `etudiant`(`MATRICULE`, `ID_PARCOURS`, `ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `STATUS`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `parcoursCursus`, `mentionCursus`, `NOMETPRENOM_PERE`, `NOMETPRENOM_MERE`, `NOMETPRENOM_TUTEUR`, `ADRESSE_PERE`, `ADRESSE_MERE`, `ADRESSE_TUTEUR`, `PROFESSION_PERE`, `PROFESSION_MERE`, `PROFESSION_TUTEUR`, `CONTACT_PERE`, `CONTACT_MERE`, `CONTACT_TUTEUR`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -145,37 +152,45 @@ app.post("/etudiant/create", (req, res) => {
 
 app.put("/etudiant/update", (req, res) => {
   const etudiant = {
-    parcours: req.body.ID_PARCOURS,
-    niveau: req.body.ID_NIVEAU,
-    nomEtudiant: req.body.NOM_ETUDIANT,
-    prenomEtudiant: req.body.PRENOM_ETUDIANT,
-    dateNaissance: req.body.DATENAISSANCE,
-    lieuNaissance: req.body.LIEUNAISSANCE,
-    situationMatri: req.body.SITUATION_MATRI,
-    cin: req.body.CIN,
-    adresse: req.body.ADRESSE,
-    contact: req.body.CONTACT,
-    email: req.body.EMAIL,
-    status: req.body.STATUS,
-    nomPere: req.body.NOMETPRENOM_PERE,
-    nomMere: req.body.NOMETPRENOM_MERE,
-    nomTuteur: req.body.NOMETPRENOM_TUTEUR,
-    adressePere: req.body.ADRESSE_PERE,
-    adresseMere: req.body.ADRESSE_MERE,
-    adresseTuteur: req.body.ADRESSE_TUTEUR,
-    professionPere: req.body.PROFESSION_PERE,
-    professionMere: req.body.PROFESSION_MERE,
-    professionTuteur: req.body.PROFESSION_TUTEUR,
-    contactPere: req.body.CONTACT_PERE,
-    contactMere: req.body.CONTACT_MERE,
-    contactTuteur: req.body.CONTACT_TUTEUR,
-    matricule: req.body.MATRICULE,
+    matricule: req.body.matricule,
+    parcours: req.body.parcours,
+    niveau: req.body.niveau,
+    nomEtudiant: req.body.nom,
+    prenomEtudiant: req.body.prenom,
+    dateNaissance: req.body.dateNaissance,
+    lieuNaissance: req.body.lieuNaissance,
+    situationMatri: req.body.situation,
+    cin: req.body.cin,
+    adresse: req.body.adresse,
+    contact: req.body.telephone,
+    email: req.body.email,
+    status: req.body.status,
+    serieBac:req.body.serie,
+    anneeScolaire:req.body.anneeScolaire,
+    resultat:req.body.resultat,
+    anneeUnivCursus:req.body.anneeUnivCursus,
+    univ: req.body.univ,
+    niveauCursus: req.body.niveauCursus,
+    parcoursCursus:req.body.parcoursCursus,
+    mentionCursus:req.body.mentionCursus,
+    nomPere: req.body.nomPere,
+    nomMere: req.body.nomMere,
+    nomTuteur: req.body.nomTuteur,
+    adressePere: req.body.adressePere,
+    adresseMere: req.body.adresseMere,
+    adresseTuteur: req.body.adresseTuteur,
+    professionPere: req.body.professionPere,
+    professionMere: req.body.professionMere,
+    professionTuteur: req.body.professionTuteur,
+    contactPere: req.body.contactPere,
+    contactMere: req.body.contactMere,
+    contactTuteur: req.body.contactTuteur,
   };
 
   const valeur = Object.values(etudiant);
 
   const sql =
-    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`NOM_ETUDIANT`=?,`PRENOM_ETUDIANT`=?,`DATENAISSANCE`=?,`LIEUNAISSANCE`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`STATUS`=?,`NOMETPRENOM_PERE`=?,`NOMETPRENOM_MERE`=?,`NOMETPRENOM_TUTEUR`=?,`ADRESSE_PERE`=?,`ADRESSE_MERE`=?,`ADRESSE_TUTEUR`=?,`PROFESSION_PERE`=?,`PROFESSION_MERE`=?,`PROFESSION_TUTEUR`=?,`CONTACT_PERE`=?,`CONTACT_MERE`=?,`CONTACT_TUTEUR`=? WHERE `MATRICULE`=?";
+    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`NOM_ETUDIANT`=?,`PRENOM_ETUDIANT`=?,`DATENAISSANCE`=?,`LIEUNAISSANCE`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`STATUS`=?,`serieBac`=?,`anneeScolaire`=?,`resultat`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`parcoursCursus`=?,`mentionCursus`=?,`NOMETPRENOM_PERE`=?,`NOMETPRENOM_MERE`=?,`NOMETPRENOM_TUTEUR`=?,`ADRESSE_PERE`=?,`ADRESSE_MERE`=?,`ADRESSE_TUTEUR`=?,`PROFESSION_PERE`=?,`PROFESSION_MERE`=?,`PROFESSION_TUTEUR`=?,`CONTACT_PERE`=?,`CONTACT_MERE`=?,`CONTACT_TUTEUR`=? WHERE `MATRICULE`=?";
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -196,14 +211,17 @@ app.get("/inscription", (req, res) => {
 });
 
 app.post("/inscription/create", (req, res) => {
+  const inscriptionDate = Date.now;
+  const dateFormat = moment(inscriptionDate).format("DD/MM/YYYY");
+
   const inscription = {
-    matricule: req.body.MATRICULE,
-    dateInscription: req.body.DATE_INSCRIPTION,
-    parcours: req.body.ID_PARCOURS,
-    niveau: req.body.ID_NIVEAU,
-    anneeUniv: req.body.ANNEEUNIV,
-    bordereau: req.body.BORDEREAU,
-    datePaiement: req.body.DATEPAIMENT,
+    matricule: req.body.matricule,
+    dateInscription: dateFormat,
+    parcours: req.body.Parcours,
+    niveau: req.body.niveau,
+    anneeUniv: req.body.annee,
+    bordereau: req.body.numero,
+    datePaiement: req.body.datePaiement,
   };
 
   const valeurs = Object.values(inscription);
@@ -219,7 +237,7 @@ app.post("/inscription/create", (req, res) => {
 // ------------------------------------PDF-----------------
 app.get("/pdf", (req, res) => {
   const sql = "SELECT * FROM etudiant WHERE MATRICULE=?";
-  const Matricule = req.body.MATRICULE;
+  const Matricule = req.body.matricule;
   db.query(sql, [Matricule], (err, data) => {
     if (err) {
       return res.json({ error: err.message });
@@ -403,7 +421,7 @@ app.get("/pdf", (req, res) => {
 app.get("/mail", (req, res) => {
   const requette =
     "SELECT etudiant.`MATRICULE`, inscription.`ID_PARCOURS`, inscription.`ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `EMAIL`, `DATE_INSCRIPTION`,`ANNEEUNIV`, NOM_NIVEAU, NOM_PARCOURS FROM `etudiant`,`inscription`, `niveau`,`parcours`WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=?;";
-  const matricule = req.body.MATRICULE;
+  const matricule = req.body.matricule;
   db.query(requette, [matricule], (err, data) => {
     if (err) {
       return res.json({ error: err.message });
