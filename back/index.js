@@ -2,9 +2,12 @@ import express from "express";
 import mysql from "mysql";
 import cors from "cors";
 import multer from "multer";
-import path from 'path';
-import PDFDocument from 'pdfkit'
-import fs from 'fs'
+import path from "path";
+import PDFDocument from "pdfkit";
+import fs from "fs";
+import moment from "moment";
+import nodemailer from "nodemailer"
+
 
 const app = express();
 app.use(cors());
@@ -14,16 +17,16 @@ app.use(express.json());
 
 const storage = multer.diskStorage({
   designation: (req, file, cb) => {
-    db(null, "public/image")
+    db(null, "public/image");
   },
 
-  filename: (req, file, cb) =>{
+  filename: (req, file, cb) => {
     db(null, file.fieldname + "_" + Date.now() + path.extname(fileorginalname));
-  } 
-})
+  },
+});
 
-const upload = multer({ 
-  Storage: storage 
+const upload = multer({
+  Storage: storage,
 });
 
 // 1-const storage = multer.diskStorage({
@@ -34,8 +37,8 @@ const upload = multer({
 //   }
 // });
 
-// const upload = multer({ 
-//   storage 
+// const upload = multer({
+//   storage
 // });
 
 const db = mysql.createConnection({
@@ -55,17 +58,15 @@ const db = mysql.createConnection({
   // }
 });
 
- 
-app.post('/etudiant/create1', upload.single('image')  , (req, res) => {
-  console.log(req.file)
+app.post("/etudiant/create1", upload.single("image"), (req, res) => {
+  console.log(req.file);
   const image = req.file.filename;
-  const sql = "INSERT INTO etudiant (photo) VALUES (?)"
-  db.query(sql, [image], (err, data) =>{
+  const sql = "INSERT INTO etudiant (photo) VALUES (?)";
+  db.query(sql, [image], (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
-  })
-})
-
+  });
+});
 
 // 1-Route pour l'insertion d'un étudiant avec une photo
 // app.post('/etudiant/create1', upload.single('photo2'), async (req, res) => {
@@ -90,7 +91,6 @@ app.post('/etudiant/create1', upload.single('image')  , (req, res) => {
 // });
 
 //   -----------------
-
 
 // ETUDIANT
 
@@ -217,176 +217,253 @@ app.post("/inscription/create", (req, res) => {
 });
 
 // ------------------------------------PDF-----------------
-app.get("/generate-pdf", (req, res) => {
+app.get("/pdf", (req, res) => {
+  const sql = "SELECT * FROM etudiant WHERE MATRICULE=?";
+  const Matricule = req.body.MATRICULE;
+  db.query(sql, [Matricule], (err, data) => {
+    if (err) {
+      return res.json({ error: err.message });
+    } else if (data.length === 0) {
+      return res.json({
+        message: "Aucune donnée d'étudiant trouvée dans la base de données",
+      });
+    } else {
+      const etudiant = data[0]; // Accéder aux données du premier étudiant
+      const NaissanceDate = etudiant.DATENAISSANCE;
+      const dateFormat = moment(NaissanceDate).format("DD/MM/YYYY");
 
+      const personne = {
+        MATRICULE: etudiant.MATRICULE,
+        ID_PARCOURS: etudiant.ID_PARCOURS,
+        ID_NIVEAU: etudiant.ID_NIVEAU,
+        NOM_ETUDIANT: etudiant.NOM_ETUDIANT,
+        PRENOM_ETUDIANT: etudiant.PRENOM_ETUDIANT,
+        DATENAISSANCE: dateFormat,
+        LIEUNAISSANCE: etudiant.LIEUNAISSANCE,
+        CIN: etudiant.CIN,
+        ADRESSE: etudiant.ADRESSE,
 
-  const doc = new PDFDocument({
-    size: "A6",
-    layout: "landscape",
-  });
-  doc.pipe(fs.createWriteStream("pdf.pdf"));
-  doc.pipe(res);
+        CONTACT: etudiant.CONTACT,
+        EMAIL: etudiant.EMAIL,
+      };
 
-  const personne = {
-    MATRICULE: "2450",
-    ID_PARCOURS: "GB",
-    ID_NIVEAU: "L3",
-    NOM_ETUDIANT: "RASOLONIRINA",
-    PRENOM_ETUDIANT: "Fitahiana Martial",
-    DATENAISSANCE: "2002-03-29",
-    LIEUNAISSANCE: "Isada Fianarantsoa",
-    SITUATION_MATRI: "Célibataire",
-    CIN: 201012031144,
-    ADRESSE: "IR 323 Ambanilalana Fianarantsoa",
-    CONTACT: 346331923,
-    EMAIL: "ttnmiora@gmail.com",
-    STATUS: "Admis",
-    CONTACT: "0346331923",
-  };
-  
+      const doc = new PDFDocument({
+        size: "A6",
+        layout: "landscape",
+      });
+      doc.pipe(fs.createWriteStream(`./uploads/${personne.MATRICULE}.pdf`));
+      doc.pipe(res);
 
-  doc.image("./image/MIORA.png", 30, 110, {
-    fit: [80, 200],
-  });
+      doc.image("./image/MIORA.png", 30, 110, {
+        fit: [80, 200],
+      });
 
-  doc.image("./image/fianarantsoa.jpg", 50, 7, {
-    fit: [40, 60],
-    align: "right",
-    valign: "bottom",
-  });
+      doc.image("./image/fianarantsoa.jpg", 50, 7, {
+        fit: [40, 60],
+        align: "right",
+        valign: "bottom",
+      });
 
-  doc.fontSize(8);
-  doc.font("Times-Roman");
-  doc.text(
-    "MINISTERE DE L ENSEIGNEMENT SUPERIEUR \n ET DE LA RECHERCHE SCIENTIFIQUE",
-    70,
-    20,
-    {
-      align: "center",
+      doc.fontSize(8);
+      doc.font("Times-Roman");
+      doc.text(
+        "MINISTERE DE L ENSEIGNEMENT SUPERIEUR \n ET DE LA RECHERCHE SCIENTIFIQUE",
+        70,
+        20,
+        {
+          align: "center",
+        }
+      );
+
+      doc.fontSize(9);
+      doc.font("Courier-Bold");
+      doc.text("UNIVERSITE DE FIANARANTSOA", 70, 40, {
+        align: "center",
+      });
+
+      doc.fontSize(10);
+      doc.text("ECOLE NATIONALE D'INFORMATIQUE", 70, 50, {
+        align: "center",
+      });
+
+      doc.font("Courier-BoldOblique", 5);
+      doc.text(
+        '"Ecole ingénieuse, pépinière des élites informaticiennes"',
+        70,
+        60,
+        {
+          align: "center",
+        }
+      );
+
+      doc.image("./image/eni.png", 330, 7, {
+        fit: [40, 60],
+        align: "right",
+        valign: "bottom",
+      });
+
+      doc.fontSize(9);
+      doc.font("Courier-Bold");
+      doc.text(
+        `Matricule: ${personne.MATRICULE}\n Niveau: ${personne.ID_NIVEAU} \n `,
+        50,
+        80
+      );
+      doc.fontSize(9);
+      doc.font("Courier-Bold");
+      doc.text(
+        ` Parcours: ${personne.ID_PARCOURS} \n Mention: Informatique`,
+        220,
+        80
+      );
+
+      doc.fontSize(8);
+      doc.font("Times-Italic");
+      doc.text("Nom:", 120, 110);
+
+      doc.fontSize(10);
+      doc.font("Times-Bold");
+      doc.text(personne.NOM_ETUDIANT, 130);
+
+      doc.fontSize(8);
+      doc.font("Times-Italic");
+      doc.text("Prénoms:", 120);
+
+      doc.font("Times-Roman", 10);
+      doc.text(personne.PRENOM_ETUDIANT, 130);
+
+      doc.image("./image/calendrier.png", 120, 150, {
+        fit: [16, 16],
+      });
+
+      doc.font("Times-Italic", 8);
+      doc.text(`Né le: `, 140, 155);
+
+      doc.font("Times-Roman", 10);
+      doc.text(` ${personne.DATENAISSANCE}`, 160, 155);
+
+      doc.font("Times-Italic", 8);
+      doc.text(` à : `, 215, 155);
+
+      doc.font("Times-Roman", 10);
+      doc.text(` ${personne.LIEUNAISSANCE}`, 225, 155);
+
+      doc.image("./image/cin.png", 120, 170, {
+        fit: [16, 16],
+      });
+
+      doc.font("Times-Italic", 8);
+      doc.text(`CIN:`, 140, 175);
+
+      doc.font("Times-Roman", 10);
+      doc.text(`${personne.CIN}`, 160, 173);
+
+      doc.image("./image/phone.png", 120, 190, {
+        fit: [16, 16],
+      });
+
+      doc.font("Times-Italic", 8);
+      doc.text(`Téléphone:`, 140, 195);
+
+      doc.font("Times-Roman", 10);
+      doc.text(`0${personne.CONTACT}`, 177, 195);
+
+      doc.font("Times-Italic", 8);
+      doc.text(`Email:`, 230, 195);
+
+      doc.font("Times-Roman", 10);
+      doc.text(` ${personne.EMAIL}`, 253, 194);
+
+      doc.image("./image/localisation.png", 120, 210, {
+        fit: [16, 16],
+      });
+
+      doc.font("Times-Italic", 8);
+      doc.text(`Adresse:`, 140, 215);
+
+      doc.font("Times-Roman", 10);
+      doc.text(` ${personne.ADRESSE}`, 170, 213);
+
+      doc.image("./image/signature.PNG", 50, 240, {
+        fit: [30, 50],
+      });
+
+      doc.image("./image/annee.PNG", 300, 270, {
+        fit: [100, 150],
+      });
+
+      doc.end();
     }
-  );
-
-  doc.fontSize(9);
-  doc.font("Courier-Bold");
-  doc.text("UNIVERSITE DE FIANARANTSOA", 70, 40, {
-    align: "center",
   });
-
-  doc.fontSize(10);
-  doc.text("ECOLE NATIONALE D'INFORMATIQUE", 70, 50, {
-    align: "center",
-  });
-
-  doc.font("Courier-BoldOblique", 5);
-  doc.text(
-    '"Ecole ingénieuse, pépinière des élites informaticiennes"',
-    70,
-    60,
-    {
-      align: "center",
-    }
-  );
-
-  doc.image("./image/eni.png", 330, 7, {
-    fit: [40, 60],
-    align: "right",
-    valign: "bottom",
-  });
-
-  doc.fontSize(9);
-  doc.font("Courier-Bold");
-  doc.text(
-    `Matricule: ${personne.MATRICULE}\n Niveau: ${personne.ID_NIVEAU} \n `,
-    50,
-    80
-  );
-  doc.fontSize(9);
-  doc.font("Courier-Bold");
-  doc.text(
-    ` Parcours: ${personne.ID_PARCOURS} \n Mention: Informatique`,
-    220,
-    80
-  );
-
-  doc.fontSize(8);
-  doc.font("Times-Italic");
-  doc.text("Nom:", 120, 110);
-
-  doc.fontSize(10);
-  doc.font("Times-Bold");
-  doc.text(personne.NOM_ETUDIANT, 130);
-
-  doc.fontSize(8);
-  doc.font("Times-Italic");
-  doc.text("Prénoms:", 120);
-
-  doc.font("Times-Roman", 10);
-  doc.text(personne.PRENOM_ETUDIANT, 130);
-
-  doc.image("./image/calendrier.png", 120, 150, {
-    fit: [16, 16],
-  });
-
-  doc.font("Times-Italic", 8);
-  doc.text(`Né le: `, 140, 155);
-
-  doc.font("Times-Roman", 10);
-  doc.text(` ${personne.DATENAISSANCE}`, 160, 155);
-
-  doc.font("Times-Italic", 8);
-  doc.text(` à : `, 215, 155);
-
-  doc.font("Times-Roman", 10);
-  doc.text(` ${personne.LIEUNAISSANCE}`, 225, 155);
-
-  doc.image("./image/cin.png", 120, 170, {
-    fit: [16, 16],
-  });
-
-  doc.font("Times-Italic", 8);
-  doc.text(`CIN:`, 140, 175);
-
-  doc.font("Times-Roman", 10);
-  doc.text(`${personne.CIN}`, 160, 173);
-
-  doc.image("./image/phone.png", 120, 190, {
-    fit: [16, 16],
-  });
-
-  doc.font("Times-Italic", 8);
-  doc.text(`Téléphone:`, 140, 195);
-
-  doc.font("Times-Roman", 10);
-  doc.text(`${personne.CONTACT}`, 177, 195);
-
-  doc.font("Times-Italic", 8);
-  doc.text(`Email:`, 230, 195);
-
-  doc.font("Times-Roman", 10);
-  doc.text(` ${personne.EMAIL}`, 253, 194);
-
-  doc.image("./image/localisation.png", 120, 210, {
-    fit: [16, 16],
-  });
-
-  doc.font("Times-Italic", 8);
-  doc.text(`Adresse:`, 140, 215);
-
-  doc.font("Times-Roman", 10);
-  doc.text(` ${personne.ADRESSE}`, 170, 213);
-
-  doc.image("./image/signature.PNG", 50, 240, {
-    fit: [30, 50],
-  });
-
-  doc.image("./image/annee.PNG", 300, 270, {
-    fit: [100, 150],
-  });
-
-  doc.end();
 });
 
-// --------------------------------PDF----------------------
+// --------------------------------PDF------------------------------
+
+//-------------------------------MAIL-------------------------------
+app.get("/mail", (req, res) => {
+  const requette =
+    "SELECT etudiant.`MATRICULE`, inscription.`ID_PARCOURS`, inscription.`ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `EMAIL`, `DATE_INSCRIPTION`,`ANNEEUNIV`, NOM_NIVEAU, NOM_PARCOURS FROM `etudiant`,`inscription`, `niveau`,`parcours`WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=?;";
+  const matricule = req.body.MATRICULE;
+  db.query(requette, [matricule], (err, data) => {
+    if (err) {
+      return res.json({ error: err.message });
+    } else if (data.length === 0) {
+      return res.json({
+        message: "Aucune donnée d'étudiant trouvée dans la base de données",
+      });
+    } else {
+      const etudiant = data[0]; // Accéder aux données du premier étudiant
+      const dateInscription = etudiant.DATE_INSCRIPTION;
+      const dateFormat = moment(dateInscription).format("DD/MM/YYYY");
+
+      const personne = {
+        MATRICULE: etudiant.MATRICULE,
+        ID_PARCOURS: etudiant.NOM_PARCOURS,
+        ID_NIVEAU: etudiant.NOM_NIVEAU,
+        NOM_ETUDIANT: etudiant.NOM_ETUDIANT,
+        PRENOM_ETUDIANT: etudiant.PRENOM_ETUDIANT,
+        ANNEE: etudiant.ANNEEUNIV,
+        EMAIL: etudiant.EMAIL,
+        INSCRIPTIONDATE: dateFormat,
+      };
+
+      const htmlMail = `<p style="text-align: center;"><b>Bonjour ${personne.NOM_ETUDIANT} ${personne.PRENOM_ETUDIANT} ! </b> </p><p>Nous tenons à vous informer que vous avez été inscrit avec succès à l\'établissement Ecole Nationale d\'Informatique en année universitaire ${personne.ANNEE} à ce jour le ${personne.INSCRIPTIONDATE} </p><ul><li><b>Mention</b> : Informatique</li><li><b>Parcours</b> : ${personne.ID_PARCOURS}</li><li><b>Niveau</b> : ${personne.ID_NIVEAU} </li></ul><p>Nous vous envoyons ci-joint votre carte d\'étudiant en format PDF à imprimer.</p><p>Nous vous communiquerons dans le plus bref délai la date de rentrée universitaire.</p><p>Si vous avez besoin de plus d\'informations, veuillez nous contacter par mail ou veuillez vous renseigner à la scolarité de l\'ENI en mentionnant votre numéro matricule ${personne.MATRICULE} .</p>`;
+
+      let transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "eni.inscriptions@gmail.com",
+          pass: "beab rdcj exin gpjx",
+        },
+      });
+
+      let mailOptions = {
+        from: "eni.inscriptions@gmail.com",
+        to: personne.EMAIL,
+        subject: "Inscription",
+        html: htmlMail,
+        attachments: [
+          {
+            filename: `${personne.MATRICULE}.pdf`,
+            path: `./uploads/${personne.MATRICULE}.pdf`,
+          },
+        ],
+        //changer Destinataire, Sujet et Text
+      };
+
+      // Envoyer l'e-mail
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Email envoyé: " + info.response);
+        }
+      });
+    }
+  });
+});
+
+//-------------------------------MAIL-------------------------------
 
 app.listen(8080, () => {
   console.log("Your server is ready");
