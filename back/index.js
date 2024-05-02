@@ -6,8 +6,7 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import moment from "moment";
-import nodemailer from "nodemailer"
-
+import nodemailer from "nodemailer";
 
 const app = express();
 app.use(cors());
@@ -95,11 +94,11 @@ app.post("/etudiant/create1", upload.single("image"), (req, res) => {
 // ETUDIANT
 
 app.get("/etudiant", (req, res) => {
-  const sql = "SELECT * FROM etudiant";
+  const sql = "SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, inscription.ANNEEUNIV FROM etudiant, inscription WHERE etudiant.MATRICULE=inscription.MATRICULE ";
 
   db.query(sql, (err, data) => {
     if (err) return res.json(err);
-    return res.json(data);
+    return res.send(data);
   });
 });
 
@@ -117,32 +116,22 @@ app.post("/etudiant/create", (req, res) => {
     adresse: req.body.adresse,
     contact: req.body.telephone,
     email: req.body.email,
-    status: req.body.status,
-    serieBac:req.body.serie,
-    anneeScolaire:req.body.anneeScolaire,
-    resultat:req.body.resultat,
-    anneeUnivCursus:req.body.anneeUnivCursus,
+    serieBac: req.body.serie,
+    anneeScolaire: req.body.anneeScolaire,
+    resultat: req.body.resultat,
+    anneeUnivCursus: req.body.anneeUnivCursus,
     univ: req.body.univ,
     niveauCursus: req.body.niveauCursus,
-    parcoursCursus:req.body.parcoursCursus,
-    mentionCursus:req.body.mentionCursus,
-    nomPere: req.body.nomPere,
-    nomMere: req.body.nomMere,
+    Etablissement: req.body.Etablissement,
+    mentionCursus: req.body.mentionCursus,
     nomTuteur: req.body.nomTuteur,
-    adressePere: req.body.adressePere,
-    adresseMere: req.body.adresseMere,
-    adresseTuteur: req.body.adresseTuteur,
-    professionPere: req.body.professionPere,
-    professionMere: req.body.professionMere,
-    professionTuteur: req.body.professionTuteur,
-    contactPere: req.body.contactPere,
-    contactMere: req.body.contactMere,
     contactTuteur: req.body.contactTuteur,
   };
 
   const valeur = Object.values(etudiant);
 
-  const sql = "INSERT INTO `etudiant`(`MATRICULE`, `ID_PARCOURS`, `ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `STATUS`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `parcoursCursus`, `mentionCursus`, `NOMETPRENOM_PERE`, `NOMETPRENOM_MERE`, `NOMETPRENOM_TUTEUR`, `ADRESSE_PERE`, `ADRESSE_MERE`, `ADRESSE_TUTEUR`, `PROFESSION_PERE`, `PROFESSION_MERE`, `PROFESSION_TUTEUR`, `CONTACT_PERE`, `CONTACT_MERE`, `CONTACT_TUTEUR`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+  const sql =
+    "INSERT INTO `etudiant`(`MATRICULE`, `ID_PARCOURS`, `ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`,  `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`,  `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -164,33 +153,22 @@ app.put("/etudiant/update", (req, res) => {
     adresse: req.body.adresse,
     contact: req.body.telephone,
     email: req.body.email,
-    status: req.body.status,
-    serieBac:req.body.serie,
-    anneeScolaire:req.body.anneeScolaire,
-    resultat:req.body.resultat,
-    anneeUnivCursus:req.body.anneeUnivCursus,
+    serieBac: req.body.serie,
+    anneeScolaire: req.body.anneeScolaire,
+    resultat: req.body.resultat,
+    anneeUnivCursus: req.body.anneeUnivCursus,
     univ: req.body.univ,
     niveauCursus: req.body.niveauCursus,
-    parcoursCursus:req.body.parcoursCursus,
-    mentionCursus:req.body.mentionCursus,
-    nomPere: req.body.nomPere,
-    nomMere: req.body.nomMere,
+    Etablissement: req.body.Etablissement,
+    mentionCursus: req.body.mentionCursus,
     nomTuteur: req.body.nomTuteur,
-    adressePere: req.body.adressePere,
-    adresseMere: req.body.adresseMere,
-    adresseTuteur: req.body.adresseTuteur,
-    professionPere: req.body.professionPere,
-    professionMere: req.body.professionMere,
-    professionTuteur: req.body.professionTuteur,
-    contactPere: req.body.contactPere,
-    contactMere: req.body.contactMere,
     contactTuteur: req.body.contactTuteur,
   };
 
   const valeur = Object.values(etudiant);
 
   const sql =
-    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`NOM_ETUDIANT`=?,`PRENOM_ETUDIANT`=?,`DATENAISSANCE`=?,`LIEUNAISSANCE`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`STATUS`=?,`serieBac`=?,`anneeScolaire`=?,`resultat`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`parcoursCursus`=?,`mentionCursus`=?,`NOMETPRENOM_PERE`=?,`NOMETPRENOM_MERE`=?,`NOMETPRENOM_TUTEUR`=?,`ADRESSE_PERE`=?,`ADRESSE_MERE`=?,`ADRESSE_TUTEUR`=?,`PROFESSION_PERE`=?,`PROFESSION_MERE`=?,`PROFESSION_TUTEUR`=?,`CONTACT_PERE`=?,`CONTACT_MERE`=?,`CONTACT_TUTEUR`=? WHERE `MATRICULE`=?";
+    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`NOM_ETUDIANT`=?,`PRENOM_ETUDIANT`=?,`DATENAISSANCE`=?,`LIEUNAISSANCE`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`serieBac`=?,`anneeScolaire`=?,`resultat`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`Etablissement`=?,`mentionCursus`=?,`NOMETPRENOM_TUTEUR`=?,`CONTACT_TUTEUR`=? WHERE `MATRICULE`=?";
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -235,9 +213,9 @@ app.post("/inscription/create", (req, res) => {
 });
 
 // ------------------------------------PDF-----------------
-app.get("/pdf", (req, res) => {
+app.get("/pdf/:matricule", (req, res) => {
   const sql = "SELECT * FROM etudiant WHERE MATRICULE=?";
-  const Matricule = req.body.matricule;
+  const Matricule = req.params.matricule;
   db.query(sql, [Matricule], (err, data) => {
     if (err) {
       return res.json({ error: err.message });
@@ -418,17 +396,18 @@ app.get("/pdf", (req, res) => {
 // --------------------------------PDF------------------------------
 
 //-------------------------------MAIL-------------------------------
-app.get("/mail", (req, res) => {
+app.get("/mail/:matricule", (req, res) => {
   const requette =
-    "SELECT etudiant.`MATRICULE`, inscription.`ID_PARCOURS`, inscription.`ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `EMAIL`, `DATE_INSCRIPTION`,`ANNEEUNIV`, NOM_NIVEAU, NOM_PARCOURS FROM `etudiant`,`inscription`, `niveau`,`parcours`WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=?;";
-  const matricule = req.body.matricule;
+    "SELECT etudiant.`MATRICULE`, inscription.`ID_PARCOURS`, inscription.`ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `EMAIL`, `DATE_INSCRIPTION`,`ANNEEUNIV`, NOM_NIVEAU, NOM_PARCOURS FROM `etudiant`,`inscription`, `niveau`,`parcours`WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=? ;";
+  const matricule = req.params.matricule;
+  // const annee = req.params.annee;
   db.query(requette, [matricule], (err, data) => {
     if (err) {
       return res.json({ error: err.message });
-    } else if (data.length === 0) {
-      return res.json({
-        message: "Aucune donnée d'étudiant trouvée dans la base de données",
-      });
+    // } else if (data.length === 0) {
+    //   return res.json({
+    //     message: "Aucune donnée d'étudiant trouvée dans la base de données",
+    //   });
     } else {
       const etudiant = data[0]; // Accéder aux données du premier étudiant
       const dateInscription = etudiant.DATE_INSCRIPTION;
@@ -475,6 +454,7 @@ app.get("/mail", (req, res) => {
           console.log(error);
         } else {
           console.log("Email envoyé: " + info.response);
+          re
         }
       });
     }
