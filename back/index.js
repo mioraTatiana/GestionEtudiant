@@ -398,9 +398,8 @@ app.get("/pdf/:matricule", (req, res) => {
 //-------------------------------MAIL-------------------------------
 app.get("/mail/:matricule", (req, res) => {
   const requette =
-    "SELECT etudiant.`MATRICULE`, inscription.`ID_PARCOURS`, inscription.`ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `EMAIL`, `DATE_INSCRIPTION`,`ANNEEUNIV`, NOM_NIVEAU, NOM_PARCOURS FROM `etudiant`,`inscription`, `niveau`,`parcours`WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=? ;";
+    "SELECT etudiant.`MATRICULE`, inscription.`ID_PARCOURS`, inscription.`ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `EMAIL`, inscription.`DATE_INSCRIPTION`,`ANNEEUNIV`, NOM_NIVEAU, NOM_PARCOURS FROM `etudiant`,`inscription`, `niveau`,`parcours`WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=? ;";
   const matricule = req.params.matricule;
-  // const annee = req.params.annee;
   db.query(requette, [matricule], (err, data) => {
     if (err) {
       return res.json({ error: err.message });
@@ -409,8 +408,9 @@ app.get("/mail/:matricule", (req, res) => {
     //     message: "Aucune donnée d'étudiant trouvée dans la base de données",
     //   });
     } else {
-      const etudiant = data[0]; // Accéder aux données du premier étudiant
-      const dateInscription = etudiant.DATE_INSCRIPTION;
+      const etudiant = data[0]; 
+      console.log(etudiant)// Accéder aux données du premier étudiant
+      const dateInscription = etudiant.DATE_INSCRIPTION
       const dateFormat = moment(dateInscription).format("DD/MM/YYYY");
 
       const personne = {
@@ -462,6 +462,17 @@ app.get("/mail/:matricule", (req, res) => {
 });
 
 //-------------------------------MAIL-------------------------------
+
+
+app.get("/selectionTout/:matricule", (req,res)=>{
+  const matricule = req.params.matricule
+  const sql = 'SELECT * FROM etudiant WHERE matricule = ?'
+  db.query(sql,[matricule], (err, data) => {
+    if (err) return res.json(err);
+    return res.send(data);
+  });
+
+})
 
 app.listen(8080, () => {
   console.log("Your server is ready");
