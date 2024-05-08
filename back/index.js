@@ -490,35 +490,42 @@ app.get("/Liste/recherche/:matricule", (req, res)=> {
 
 })
 
-app.get("/Liste/Niveau/:Niveau", (req, res)=> {
-  const Niveau = req.params.Niveau
-  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE ID_NIVEAU = ?'
-  db.query(sql,[Niveau], (err, data) => {
+app.get("/Liste/variableUne/:variable", (req, res)=> {
+  const variable = req.params.variable
+  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE (ID_NIVEAU = ? OR ID_PARCOURS = ? OR ANNEEUNIV = ?)'
+  db.query(sql,[variable, variable, variable], (err, data) => {
     if (err) return res.json(err);
     return res.send(data);
   });
 
 })
 
-app.get("/Liste/Parcours/:Parcours", (req, res)=> {
-  const Parcours = req.params.Parcours
-  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE ID_PARCOURS = ?'
-  db.query(sql,[Parcours], (err, data) => {
+app.get("/Liste/variableDouble/", (req, res)=> {
+  const variable1 = req.body.variable1
+  const variable2 = req.body.variable2
+
+  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE (ID_NIVEAU = ? AND ID_PARCOURS = ? ) OR ( ID_PARCOURS = ? AND ID_NIVEAU = ? ) OR ( ID_PARCOURS = ? AND ANNEEUNIV = ?) OR ( ANNEEUNIV = ? AND ID_PARCOURS = ?) OR (ID_NIVEAU = ? AND ANNEEUNIV = ?) OR ( ANNEEUNIV = ? AND ID_NIVEAU = ?) '
+  db.query(sql,[variable1, variable2, variable1, variable2, variable1, variable2, variable1, variable2, variable1, variable2, variable1, variable2], (err, data) => {
     if (err) return res.json(err);
     return res.send(data);
   });
 
 })
 
-app.get("/Liste/Annee/:Annee", (req, res)=> {
-  const Annee = req.params.Annee
-  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE ANNEEUNIV = ?'
-  db.query(sql,[Annee], (err, data) => {
+app.get("/Liste/variableTriple", (req, res)=> {
+  const variable1 = req.body.niveau
+  const variable2 = req.body.parcours
+  const variable3 = req.body.annee
+
+  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE (ID_NIVEAU = ? AND ID_PARCOURS = ? AND ANNEEUNIV = ?)'
+  db.query(sql,[variable1, variable2, variable3], (err, data) => {
     if (err) return res.json(err);
     return res.send(data);
   });
 
 })
+
+
 
 
 
