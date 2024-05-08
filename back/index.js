@@ -94,7 +94,7 @@ app.post("/etudiant/create1", upload.single("image"), (req, res) => {
 // ETUDIANT
 
 app.get("/etudiant", (req, res) => {
-  const sql = "SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, inscription.ANNEEUNIV FROM etudiant, inscription WHERE etudiant.MATRICULE=inscription.MATRICULE ";
+  const sql = "SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant ";
 
   db.query(sql, (err, data) => {
     if (err) return res.json(err);
@@ -126,12 +126,13 @@ app.post("/etudiant/create", (req, res) => {
     mentionCursus: req.body.mentionCursus,
     nomTuteur: req.body.nomTuteur,
     contactTuteur: req.body.contactTuteur,
+    anneeUnivActuelle: req.body.anneeUnivActuelle
   };
 
   const valeur = Object.values(etudiant);
 
   const sql =
-    "INSERT INTO `etudiant`(`MATRICULE`, `ID_PARCOURS`, `ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`,  `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`,  `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "INSERT INTO `etudiant`(`MATRICULE`, `ID_PARCOURS`, `ID_NIVEAU`,ANNEEUNIV, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`,  `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`,  `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -139,9 +140,10 @@ app.post("/etudiant/create", (req, res) => {
   });
 });
 
-app.put("/etudiant/update", (req, res) => {
+app.put("/etudiant/update/:matricule", (req, res) => {
+
   const etudiant = {
-    matricule: req.body.matricule,
+    matricule: req.params.matricule,
     parcours: req.body.parcours,
     niveau: req.body.niveau,
     nomEtudiant: req.body.nom,
@@ -163,12 +165,14 @@ app.put("/etudiant/update", (req, res) => {
     mentionCursus: req.body.mentionCursus,
     nomTuteur: req.body.nomTuteur,
     contactTuteur: req.body.contactTuteur,
+    anneeUnivActuelle: req.body.anneeUnivActuelle
+
   };
 
   const valeur = Object.values(etudiant);
 
   const sql =
-    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`NOM_ETUDIANT`=?,`PRENOM_ETUDIANT`=?,`DATENAISSANCE`=?,`LIEUNAISSANCE`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`serieBac`=?,`anneeScolaire`=?,`resultat`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`Etablissement`=?,`mentionCursus`=?,`NOMETPRENOM_TUTEUR`=?,`CONTACT_TUTEUR`=? WHERE `MATRICULE`=?";
+    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`NOM_ETUDIANT`=?,`PRENOM_ETUDIANT`=?,`DATENAISSANCE`=?,`LIEUNAISSANCE`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`serieBac`=?,`anneeScolaire`=?,`resultat`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`Etablissement`=?,`mentionCursus`=?,`NOMETPRENOM_TUTEUR`=?,`CONTACT_TUTEUR`=?, ANNEEUNIV=? WHERE `MATRICULE`=?";
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -473,6 +477,51 @@ app.get("/selectionTout/:matricule", (req,res)=>{
   });
 
 })
+
+// -----------------Liste------------------------//
+app.get("/Liste/recherche/:matricule", (req, res)=> {
+  const matricule = req.params.matricule
+  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE matricule = ?'
+  db.query(sql,[matricule], (err, data) => {
+    if (err) return res.json(err);
+    return res.send(data);
+  });
+
+
+})
+
+app.get("/Liste/Niveau/:Niveau", (req, res)=> {
+  const Niveau = req.params.Niveau
+  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE ID_NIVEAU = ?'
+  db.query(sql,[Niveau], (err, data) => {
+    if (err) return res.json(err);
+    return res.send(data);
+  });
+
+})
+
+app.get("/Liste/Parcours/:Parcours", (req, res)=> {
+  const Parcours = req.params.Parcours
+  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE ID_PARCOURS = ?'
+  db.query(sql,[Parcours], (err, data) => {
+    if (err) return res.json(err);
+    return res.send(data);
+  });
+
+})
+
+app.get("/Liste/Annee/:Annee", (req, res)=> {
+  const Annee = req.params.Annee
+  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE ANNEEUNIV = ?'
+  db.query(sql,[Annee], (err, data) => {
+    if (err) return res.json(err);
+    return res.send(data);
+  });
+
+})
+
+
+
 
 app.listen(8080, () => {
   console.log("Your server is ready");
