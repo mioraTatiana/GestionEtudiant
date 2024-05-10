@@ -107,16 +107,17 @@ app.post("/etudiant/create", (req, res) => {
     matricule: req.body.matricule,
     parcours: req.body.parcours,
     niveau: req.body.niveau,
-    nomEtudiant: req.body.nom,
-    prenomEtudiant: req.body.prenom,
+    anneeUnivActuelle: req.body.anneeUnivActuelle,
+    nomEtudiant: req.body.nomEtudiant,
+    prenomEtudiant: req.body.prenomEtudiant,
     dateNaissance: req.body.dateNaissance,
     lieuNaissance: req.body.lieuNaissance,
-    situationMatri: req.body.situation,
+    situationMatri: req.body.situationMatri,
     cin: req.body.cin,
     adresse: req.body.adresse,
-    contact: req.body.telephone,
+    contact: req.body.contact,
     email: req.body.email,
-    serieBac: req.body.serie,
+    serieBac: req.body.serieBac,
     anneeScolaire: req.body.anneeScolaire,
     resultat: req.body.resultat,
     anneeUnivCursus: req.body.anneeUnivCursus,
@@ -126,7 +127,6 @@ app.post("/etudiant/create", (req, res) => {
     mentionCursus: req.body.mentionCursus,
     nomTuteur: req.body.nomTuteur,
     contactTuteur: req.body.contactTuteur,
-    anneeUnivActuelle: req.body.anneeUnivActuelle
   };
 
   const valeur = Object.values(etudiant);
@@ -143,19 +143,18 @@ app.post("/etudiant/create", (req, res) => {
 app.put("/etudiant/update/:matricule", (req, res) => {
 
   const etudiant = {
-    matricule: req.params.matricule,
     parcours: req.body.parcours,
     niveau: req.body.niveau,
-    nomEtudiant: req.body.nom,
-    prenomEtudiant: req.body.prenom,
+    nomEtudiant: req.body.nomEtudiant,
+    prenomEtudiant: req.body.prenomEtudiant,
     dateNaissance: req.body.dateNaissance,
     lieuNaissance: req.body.lieuNaissance,
-    situationMatri: req.body.situation,
+    situationMatri: req.body.situationMatri,
     cin: req.body.cin,
     adresse: req.body.adresse,
-    contact: req.body.telephone,
+    contact: req.body.contact,
     email: req.body.email,
-    serieBac: req.body.serie,
+    serieBac: req.body.serieBac,
     anneeScolaire: req.body.anneeScolaire,
     resultat: req.body.resultat,
     anneeUnivCursus: req.body.anneeUnivCursus,
@@ -165,7 +164,8 @@ app.put("/etudiant/update/:matricule", (req, res) => {
     mentionCursus: req.body.mentionCursus,
     nomTuteur: req.body.nomTuteur,
     contactTuteur: req.body.contactTuteur,
-    anneeUnivActuelle: req.body.anneeUnivActuelle
+    anneeUnivActuelle: req.body.anneeUnivActuelle,
+    matricule: req.params.matricule
 
   };
 
@@ -402,29 +402,25 @@ app.get("/pdf/:matricule", (req, res) => {
 //-------------------------------MAIL-------------------------------
 app.get("/mail/:matricule", (req, res) => {
   const requette =
-    "SELECT etudiant.`MATRICULE`, inscription.`ID_PARCOURS`, inscription.`ID_NIVEAU`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `EMAIL`, inscription.`DATE_INSCRIPTION`,`ANNEEUNIV`, NOM_NIVEAU, NOM_PARCOURS FROM `etudiant`,`inscription`, `niveau`,`parcours`WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=? ;";
+    "SELECT etudiant.MATRICULE, inscription.ID_PARCOURS, inscription.ID_NIVEAU, NOM_ETUDIANT, PRENOM_ETUDIANT, EMAIL, inscription.DATE_INSCRIPTION, inscription.ANNEEUNIV, NOM_NIVEAU, NOM_PARCOURS FROM etudiant,inscription, niveau,parcours WHERE etudiant.MATRICULE= inscription.MATRICULE AND inscription.ID_NIVEAU = niveau.ID_NIVEAU AND parcours.ID_PARCOURS=inscription.ID_PARCOURS AND etudiant.MATRICULE=? ;";
   const matricule = req.params.matricule;
   db.query(requette, [matricule], (err, data) => {
     if (err) {
       return res.json({ error: err.message });
-    // } else if (data.length === 0) {
-    //   return res.json({
-    //     message: "Aucune donnée d'étudiant trouvée dans la base de données",
-    //   });
     } else {
       const etudiant = data[0]; 
       console.log(etudiant)// Accéder aux données du premier étudiant
-      const dateInscription = etudiant.DATE_INSCRIPTION
+      const dateInscription = etudiant.DATE_INSCRIPTION 
       const dateFormat = moment(dateInscription).format("DD/MM/YYYY");
 
       const personne = {
-        MATRICULE: etudiant.MATRICULE,
-        ID_PARCOURS: etudiant.NOM_PARCOURS,
-        ID_NIVEAU: etudiant.NOM_NIVEAU,
-        NOM_ETUDIANT: etudiant.NOM_ETUDIANT,
-        PRENOM_ETUDIANT: etudiant.PRENOM_ETUDIANT,
-        ANNEE: etudiant.ANNEEUNIV,
-        EMAIL: etudiant.EMAIL,
+        MATRICULE:  etudiant.MATRICULE ,
+        ID_PARCOURS:  etudiant.NOM_PARCOURS ,
+        ID_NIVEAU:  etudiant.NOM_NIVEAU ,
+        NOM_ETUDIANT:  etudiant.NOM_ETUDIANT ,
+        PRENOM_ETUDIANT:  etudiant.PRENOM_ETUDIANT,
+        ANNEE:  etudiant.ANNEEUNIV ,
+        EMAIL:  etudiant.EMAIL ,
         INSCRIPTIONDATE: dateFormat,
       };
 
