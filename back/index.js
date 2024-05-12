@@ -145,18 +145,11 @@ app.put("/etudiant/update/:matricule", (req, res) => {
   const etudiant = {
     parcours: req.body.parcours,
     niveau: req.body.niveau,
-    nomEtudiant: req.body.nomEtudiant,
-    prenomEtudiant: req.body.prenomEtudiant,
-    dateNaissance: req.body.dateNaissance,
-    lieuNaissance: req.body.lieuNaissance,
     situationMatri: req.body.situationMatri,
     cin: req.body.cin,
     adresse: req.body.adresse,
     contact: req.body.contact,
     email: req.body.email,
-    serieBac: req.body.serieBac,
-    anneeScolaire: req.body.anneeScolaire,
-    resultat: req.body.resultat,
     anneeUnivCursus: req.body.anneeUnivCursus,
     univ: req.body.univ,
     niveauCursus: req.body.niveauCursus,
@@ -172,7 +165,7 @@ app.put("/etudiant/update/:matricule", (req, res) => {
   const valeur = Object.values(etudiant);
 
   const sql =
-    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`NOM_ETUDIANT`=?,`PRENOM_ETUDIANT`=?,`DATENAISSANCE`=?,`LIEUNAISSANCE`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`serieBac`=?,`anneeScolaire`=?,`resultat`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`Etablissement`=?,`mentionCursus`=?,`NOMETPRENOM_TUTEUR`=?,`CONTACT_TUTEUR`=?, ANNEEUNIV=? WHERE `MATRICULE`=?";
+    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`Etablissement`=?,`mentionCursus`=?,`NOMETPRENOM_TUTEUR`=?,`CONTACT_TUTEUR`=?, ANNEEUNIV=? WHERE `MATRICULE`=?";
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -193,13 +186,14 @@ app.get("/inscription", (req, res) => {
 });
 
 app.post("/inscription/create", (req, res) => {
-  const inscriptionDate = Date.now;
+  const inscriptionDate = new Date();
   const dateFormat = moment(inscriptionDate).format("DD/MM/YYYY");
+  console.log(dateFormat)
 
   const inscription = {
     matricule: req.body.matricule,
     dateInscription: dateFormat,
-    parcours: req.body.Parcours,
+    parcours: req.body.parcours,
     niveau: req.body.niveau,
     anneeUniv: req.body.annee,
     bordereau: req.body.numero,
@@ -207,8 +201,7 @@ app.post("/inscription/create", (req, res) => {
   };
 
   const valeurs = Object.values(inscription);
-  const sql = `INSERT INTO inscription (
-      MATRICULE, DATE_INSCRIPTION, ID_PARCOURS, ID_NIVEAU, ANNEEUNIV, BORDEREAU, DATEPAIMENT) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO inscription (MATRICULE, DATE_INSCRIPTION, ID_PARCOURS, ID_NIVEAU, ANNEEUNIV, BORDEREAU, DATEPAIMENT) VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
   db.query(sql, valeurs, (err, data) => {
     if (err) return res.json(err);
@@ -410,11 +403,11 @@ app.get("/mail/:matricule", (req, res) => {
     } else {
       const etudiant = data[0]; 
       console.log(etudiant)// Accéder aux données du premier étudiant
-      const dateInscription = etudiant.DATE_INSCRIPTION 
-      const dateFormat = moment(dateInscription).format("DD/MM/YYYY");
+      const dateInscription = new Date()
+      var dateFormat = moment(dateInscription).format("DD/MM/YYYY");
 
       const personne = {
-        MATRICULE:  etudiant.MATRICULE ,
+        MATRICULE: matricule ,
         ID_PARCOURS:  etudiant.NOM_PARCOURS ,
         ID_NIVEAU:  etudiant.NOM_NIVEAU ,
         NOM_ETUDIANT:  etudiant.NOM_ETUDIANT ,
@@ -466,13 +459,26 @@ app.get("/mail/:matricule", (req, res) => {
 
 app.get("/selectionTout/:matricule", (req,res)=>{
   const matricule = req.params.matricule
-  const sql = 'SELECT * FROM etudiant WHERE matricule = ?'
+  const sql = " SELECT etudiant.`MATRICULE`,etudiant.`ID_PARCOURS`,etudiant.`ID_NIVEAU`,etudiant.`ANNEEUNIV`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`, `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`, `BORDEREAU`, `DATE_INSCRIPTION` FROM `etudiant`,`inscription` WHERE etudiant.MATRICULE=inscription.MATRICULE AND etudiant.ANNEEUNIV= inscription.ANNEEUNIV AND etudiant.MATRICULE=?"
+
   db.query(sql,[matricule], (err, data) => {
     if (err) return res.json(err);
     return res.send(data);
   });
 
 })
+
+app.get("/selectionNIV/:matricule", (req,res)=>{
+  const matricule = req.params.matricule
+  const sql = " SELECT etudiant.`MATRICULE`,etudiant.`ID_PARCOURS`,etudiant.`ID_NIVEAU`,etudiant.`ANNEEUNIV`FROM etudiant WHERE etudiant.MATRICULE=?"
+
+  db.query(sql,[matricule], (err, data) => {
+    if (err) return res.json(err);
+    return res.send(data);
+  });
+
+})
+
 
 // -----------------Liste------------------------//
 app.get("/Liste/recherche/:matricule", (req, res)=> {
@@ -520,7 +526,6 @@ app.get("/Liste/variableTriple", (req, res)=> {
   });
 
 })
-
 
 
 
