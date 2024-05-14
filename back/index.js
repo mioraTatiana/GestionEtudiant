@@ -455,13 +455,23 @@ app.get("/mail/:matricule", (req, res) => {
 });
 
 //-------------------------------MAIL-------------------------------
+app.get("/selectionTout/reinscription/:matricule", (req,res)=>{
+  const matricule = req.params.matricule
+  const sql = " SELECT etudiant.`MATRICULE`,etudiant.`ID_PARCOURS`,etudiant.`ID_NIVEAU`,etudiant.`ANNEEUNIV`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`, `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`  FROM `etudiant` WHERE  etudiant.MATRICULE=?"
+
+  db.query(sql,[matricule], (err, data) => {
+    if (err) return res.json(err);
+    return res.send(data);
+  });
+
+})
 
 
 app.get("/selectionTout/:matricule", (req,res)=>{
   const matricule = req.params.matricule
-  const sql = " SELECT etudiant.`MATRICULE`,etudiant.`ID_PARCOURS`,etudiant.`ID_NIVEAU`,etudiant.`ANNEEUNIV`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`, `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`, `BORDEREAU`, `DATE_INSCRIPTION` FROM `etudiant`,`inscription` WHERE etudiant.MATRICULE=inscription.MATRICULE AND etudiant.ANNEEUNIV= inscription.ANNEEUNIV AND etudiant.MATRICULE=?"
+  const sql = " SELECT etudiant.`MATRICULE`,etudiant.`ID_PARCOURS`,etudiant.`ID_NIVEAU`,etudiant.`ANNEEUNIV`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`, `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`, `BORDEREAU`, `DATE_INSCRIPTION` FROM `etudiant`,`inscription` WHERE etudiant.ANNEEUNIV= inscription.ANNEEUNIV AND etudiant.MATRICULE=? AND inscription.MATRICULE=?"
 
-  db.query(sql,[matricule], (err, data) => {
+  db.query(sql,[matricule,matricule], (err, data) => {
     if (err) return res.json(err);
     return res.send(data);
   });
