@@ -1,8 +1,6 @@
 import express from "express";
 import mysql from "mysql";
 import cors from "cors";
-import multer from "multer";
-import path from "path";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import moment from "moment";
@@ -14,31 +12,7 @@ app.use(express.json());
 
 //  ----------------------
 
-const storage = multer.diskStorage({
-  designation: (req, file, cb) => {
-    db(null, "public/image");
-  },
 
-  filename: (req, file, cb) => {
-    db(null, file.fieldname + "_" + Date.now() + path.extname(fileorginalname));
-  },
-});
-
-const upload = multer({
-  Storage: storage,
-});
-
-// 1-const storage = multer.diskStorage({
-//   destination: './uploads/', // Change this to your desired upload directory
-//   filename: (req, file, cb) => {
-//       const uniqueFileName = `${Date.now()}-${file.originalname}`;
-//       cb(null, uniqueFileName);
-//   }
-// });
-
-// const upload = multer({
-//   storage
-// });
 
 const db = mysql.createConnection({
   host: "localhost",
@@ -46,50 +20,8 @@ const db = mysql.createConnection({
   password: "",
   database: "mlr3",
 
-  // queryFormat: function(query, values){
-  //   if (!values) return query;
-  //   return query.replace(\/:(w+)/g, function(txt, key){
-  //     if (values.hasOwnProperty(key)) {
-  //       return this.escape(values.[key]);
-  //     }
-  //     return txt;
-  //   }.bind(this));
-  // }
 });
 
-app.post("/etudiant/create1", upload.single("image"), (req, res) => {
-  console.log(req.file);
-  const image = req.file.filename;
-  const sql = "INSERT INTO etudiant (photo) VALUES (?)";
-  db.query(sql, [image], (err, data) => {
-    if (err) return res.json(err);
-    return res.json(data);
-  });
-});
-
-// 1-Route pour l'insertion d'un étudiant avec une photo
-// app.post('/etudiant/create1', upload.single('photo2'), async (req, res) => {
-//   try {
-//       const { photo2 } = req.file.filename; // Extract the filename from the uploaded file
-
-//       const sql = `INSERT INTO etudiant (photo2) VALUES (?)`;
-//       const values = [photo2];
-
-//       await connection.query(sql, values, (err, result) => {
-//           if (err) {
-//               console.error('Error inserting student:', err);
-//               // return res.status(500).json({ message: 'Error creating student' });
-//           }
-
-//           res.status(201).json({ message: 'Student created successfully' });
-//       });
-//   } catch (error) {
-//       console.error('Error processing image or creating student:', error);
-//       res.status(500).json({ message: 'Error creating student' });
-//   }
-// });
-
-//   -----------------
 
 // ETUDIANT
 
@@ -146,7 +78,6 @@ app.put("/etudiant/update/:matricule", (req, res) => {
     parcours: req.body.parcours,
     niveau: req.body.niveau,
     situationMatri: req.body.situationMatri,
-    cin: req.body.cin,
     adresse: req.body.adresse,
     contact: req.body.contact,
     email: req.body.email,
@@ -165,7 +96,7 @@ app.put("/etudiant/update/:matricule", (req, res) => {
   const valeur = Object.values(etudiant);
 
   const sql =
-    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`SITUATION_MATRI`=?,`CIN`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`Etablissement`=?,`mentionCursus`=?,`NOMETPRENOM_TUTEUR`=?,`CONTACT_TUTEUR`=?, ANNEEUNIV=? WHERE `MATRICULE`=?";
+    "UPDATE `etudiant` SET `ID_PARCOURS`=?,`ID_NIVEAU`=?,`SITUATION_MATRI`=?,`ADRESSE`=?,`CONTACT`=?,`EMAIL`=?,`anneeUnivCursus`=?,`univ`=?,`niveauCursus`=?,`Etablissement`=?,`mentionCursus`=?,`NOMETPRENOM_TUTEUR`=?,`CONTACT_TUTEUR`=?, ANNEEUNIV=? WHERE `MATRICULE`=?";
 
   db.query(sql, valeur, (err, data) => {
     if (err) return res.json(err);
@@ -469,7 +400,7 @@ app.get("/selectionTout/reinscription/:matricule", (req,res)=>{
 
 app.get("/selectionTout/:matricule", (req,res)=>{
   const matricule = req.params.matricule
-  const sql = " SELECT etudiant.`MATRICULE`,etudiant.`ID_PARCOURS`,etudiant.`ID_NIVEAU`,etudiant.`ANNEEUNIV`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`, `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`, `BORDEREAU`, `DATE_INSCRIPTION` FROM `etudiant`,`inscription` WHERE etudiant.ANNEEUNIV= inscription.ANNEEUNIV AND etudiant.MATRICULE=? AND inscription.MATRICULE=?"
+  const sql = "  SELECT etudiant.`MATRICULE`,etudiant.`ID_PARCOURS`,etudiant.`ID_NIVEAU`,etudiant.`ANNEEUNIV`, `NOM_ETUDIANT`, `PRENOM_ETUDIANT`, `DATENAISSANCE`, `LIEUNAISSANCE`, `SITUATION_MATRI`, `CIN`, `ADRESSE`, `CONTACT`, `EMAIL`, `PHOTO`, `serieBac`, `anneeScolaire`, `resultat`, `anneeUnivCursus`, `univ`, `niveauCursus`, `Etablissement`, `mentionCursus`, `NOMETPRENOM_TUTEUR`, `CONTACT_TUTEUR`, `BORDEREAU`, inscription.DATEPAIMENT FROM etudiant, inscription WHERE etudiant.ANNEEUNIV= inscription.ANNEEUNIV AND etudiant.MATRICULE=? AND inscription.MATRICULE=?"
 
   db.query(sql,[matricule,matricule], (err, data) => {
     if (err) return res.json(err);
@@ -511,34 +442,6 @@ app.get("/Liste/variableUne/:variable", (req, res)=> {
   });
 
 })
-
-app.get("/Liste/variableDouble/", (req, res)=> {
-  const variable1 = req.body.variable1
-  const variable2 = req.body.variable2
-
-  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE (ID_NIVEAU = ? AND ID_PARCOURS = ? ) OR ( ID_PARCOURS = ? AND ID_NIVEAU = ? ) OR ( ID_PARCOURS = ? AND ANNEEUNIV = ?) OR ( ANNEEUNIV = ? AND ID_PARCOURS = ?) OR (ID_NIVEAU = ? AND ANNEEUNIV = ?) OR ( ANNEEUNIV = ? AND ID_NIVEAU = ?) '
-  db.query(sql,[variable1, variable2, variable1, variable2, variable1, variable2, variable1, variable2, variable1, variable2, variable1, variable2], (err, data) => {
-    if (err) return res.json(err);
-    return res.send(data);
-  });
-
-})
-
-app.get("/Liste/variableTriple", (req, res)=> {
-  const variable1 = req.body.niveau
-  const variable2 = req.body.parcours
-  const variable3 = req.body.annee
-
-  const sql = 'SELECT etudiant.`MATRICULE`, etudiant.ID_PARCOURS, etudiant.`ID_NIVEAU`, etudiant.`NOM_ETUDIANT`, etudiant.`PRENOM_ETUDIANT`, ANNEEUNIV FROM etudiant WHERE (ID_NIVEAU = ? AND ID_PARCOURS = ? AND ANNEEUNIV = ?)'
-  db.query(sql,[variable1, variable2, variable3], (err, data) => {
-    if (err) return res.json(err);
-    return res.send(data);
-  });
-
-})
-
-
-
 
 
 app.listen(8080, () => {
