@@ -117,7 +117,7 @@ app.get("/inscription", (req, res) => {
 });
 
 app.post("/inscription/create", (req, res) => {
-  const inscriptionDate = new Date();
+  const inscriptionDate = Date.now;
   const dateFormat = moment(inscriptionDate).format("DD/MM/YYYY");
   console.log(dateFormat)
 
